@@ -4,10 +4,14 @@
     </head>
     <body>
         <form enctype="multipart/form-data" action="/up.php" method="POST">
-            <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
-            Send this file: <input name="userfile" type="file" />
-            Send this file: <input name="userfile" type="file" />
-            Send this file: <input name="userfile" type="file" />
+            <input type="hidden" name="nsp_fmt" value="JSON" />
+            <input type="hidden" name="nsp_app" value="1" />
+            <input type="hidden" name="nsp_ts" value="2012-11-14 18:49:14" />
+            <input type="hidden" name="nsp_retname" value="0" />
+            <input type="hidden" name="nsp_key" value="28D6049990D26FD0C0DF94E756445EB2" />
+            Send this file: <input name="userfile0" type="file" />
+            Send this file: <input name="userfile1" type="file" />
+            Send this file: <input name="userfile2" type="file" />
             <input type="submit" value="Send File" />
         </form>
     </body>
