@@ -1,22 +1,32 @@
 local resty_md5 = require "resty.md5"
 local resty_str = require "resty.string"
+local resty_random = require "resty.random"
 local resty_upload = require "resty.upload"
 local common = require "lua.common"
+local util = require "lua.util"
 
 local nsp_key = ""
 local nsp_tstr = "1352890147"
 
+local md5 = resty_md5:new()
+
 local chunk_size = 4096
 local form = resty_upload:new(chunk_size)
 form:set_timeout(0)
-local md5 = resty_md5:new()
 
+local client_body_temp_path = "client_body_temp"
+local client_body_temp_file = ngx.shared.client_body_temp_file
+if client_body_temp_file:get("id") == nil then
+    util.prepare(client_body_temp_file)
+end
 local params = {}
 local key
 local value
 local file
+local file_path
 local file_hash
 local file_size = 0
+local files = {}
 
 while true do
     local typ, res, err = form:read()
@@ -29,7 +39,8 @@ while true do
             if k == "name" and string.find(v, "nsp_") == 1 then
                 key = v
             elseif k == "filename" then
-                file = io.open(v, "w+")
+                file_path = string.format("%s/%s", client_body_temp_path, client_body_temp_file:incr("id", 1))
+                file = io.open(file_path, "w+")
                 if not file then
                     ngx.say("failed to open file ", file_name)
                     return
@@ -55,9 +66,8 @@ while true do
             file = nil
             local md5_sum = md5:final()
             file_hash = resty_str.to_hex(md5_sum)
-            if file_size > 1024 then
-                return ngx.exec("/up.lua")
-            end
+            files[file_path] = {hash = file_hash, size = file_size, fid = file_hash .. string.format("%x", file_size)}
+            file_size = 0
             md5:reset()
         else
         end
@@ -81,25 +91,27 @@ local app_secret = resty_str.to_hex(md5:final())
 md5:reset()
 md5:update(app_secret)
 md5:update(s)
---ngx.say("cal_key=", resty_str.to_hex(md5:final()))
-ngx.say(file_hash .. string.format("%x", file_size))
+ngx.say("cal_key=", resty_str.to_hex(md5:final()))
 
---[[
-local headers = ngx.req.get_headers()
-for k, v in pairs(headers) do
-    ngx.say(k, "    ", v)
+local cnt = 0
+
+for k, v in pairs(files) do
+    ngx.say(k)
+    for field, value in pairs(v) do
+        ngx.say(field, "===", value)
+        if field == "size" then
+            cnt = cnt + value
+        end
+    end
 end
 
-ngx.req.read_body()
+local headers = ngx.req.get_headers()
+for k, v in pairs(headers) do
+    ngx.say(k, "===", v)
+    if k == "content-length" then
+        ngx.say(tonumber(v) - cnt)
+    end
+end
 
-local data = ngx.req.get_body_data()
-ngx.say(data)
 
-local file = ngx.req.get_body_file()
-ngx.say(f)
-local f = assert(io.open(file, "r"))
-local t = f.read("*all")
-ngx.say(t)
-f:close()
---]]
 --return ngx.exec("/up.lua")
