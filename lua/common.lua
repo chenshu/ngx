@@ -10,3 +10,23 @@ function pairsByKeys(t, f)
         return arr[i], t[arr[i]]
     end
 end
+
+function keyExists(t, key)
+    for k, v in pairs(t) do
+        if key == k then
+            return true
+        end
+    end
+
+    return false
+end
+
+function valueExists(t, value)
+    for k, v in pairs(t) do
+        if value == v then
+            return true
+        end
+    end
+
+    return false
+end

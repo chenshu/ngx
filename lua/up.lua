@@ -81,6 +81,8 @@ local s = ""
 for k, v in common.pairsByKeys(params) do
     if k ~= "nsp_key" then
         s = s .. k .. v
+    else
+        ngx.say("nsp_key=", v)
     end
 end
 
@@ -90,6 +92,10 @@ md5:update(nsp_tstr)
 local app_secret = resty_str.to_hex(md5:final())
 md5:reset()
 md5:update(app_secret)
+md5:update(s)
+ngx.say("cal_key=", resty_str.to_hex(md5:final()))
+md5:reset()
+md5:update(nsp_key)
 md5:update(s)
 ngx.say("cal_key=", resty_str.to_hex(md5:final()))
 
