@@ -12,10 +12,10 @@ for k, v in pairs(headers) do
 end
 
 if tonumber(content_length) > SMALL_FILE_SIZE then
-    ngx.exec("/upload/upload_big_file")
+    ngx.exec("/up/upload_big_file")
     return
 else
-    --ngx.exec("/upload/upload_small_file")
+    --ngx.exec("/up/upload_small_file")
     --return
 end
 
@@ -118,6 +118,6 @@ end
 data = data .. boundary .. prefix .. "\"userfile\"; filename=\"tmpfile\"\r\n"
 data = data .. "Content-Type: application/octet-stream\r\n\r\n" .. body .. "\r\n"
 data = data .. boundary .. "--\r\n"
-res = ngx.location.capture("/upload/upload_small_file", {method = ngx.HTTP_POST, body = data, copy_all_vars = true})
+res = ngx.location.capture("/up/upload_small_file", {method = ngx.HTTP_POST, body = data, copy_all_vars = true})
 ngx.say(res.status)
 ngx.say(string.len(res.body))
