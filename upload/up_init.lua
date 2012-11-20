@@ -3,15 +3,14 @@ local SMALL_FILE_SIZE = 1024 * 105
 local file_length = 0
 ngx.req.read_body()
 local args = ngx.req.get_post_args()
---[[
 local post_args = ngx.encode_args(args)
 for key, val in pairs(args) do
     if key == "nsp_fsize" then
         file_length = val
     end
 end
---]]
 
+--[[
 -- TODO for test
 local resty_md5 = require "resty.md5"
 local resty_str = require "resty.string"
@@ -46,13 +45,20 @@ md5:update(s)
 local nsp_key = resty_str.to_hex(md5:final())
 params["nsp_key"] = nsp_key
 local post_args = ngx.encode_args(params)
+--]]
 
 if tonumber(file_length) > SMALL_FILE_SIZE then
     res = ngx.location.capture("/up_init/upload_big_file", {method = ngx.HTTP_POST, body = post_args})
-    ngx.say(res.status)
+    if res.status ~= "200" then
+        ngx.status = res.status
+    end
     ngx.say(res.body)
+    ngx.exit(ngx.HTTP_OK)
 else
     res = ngx.location.capture("/up_init/upload_small_file", {method = ngx.HTTP_POST, body = post_args})
-    ngx.say(res.status)
+    if res.status ~= "200" then
+        ngx.status = res.status
+    end
     ngx.say(res.body)
+    ngx.exit(ngx.HTTP_OK)
 end
