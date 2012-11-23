@@ -1,7 +1,7 @@
 local SMALL_FILE_SIZE = 1024 * 105
-local SMALL_FILE_HOST = "10.6.2.50"
+local SMALL_FILE_HOST = "10.6.2.143"
 local SMALL_FILE_PORT = 80
-local BIG_FILE_HOST = "10.6.2.143"
+local BIG_FILE_HOST = "10.6.2.50"
 local BIG_FILE_PORT = 80
 
 local req = "POST /up/up_blk HTTP/1.1\r\n"
@@ -186,7 +186,7 @@ end
 
 local ok, err = sock:setkeepalive(300000, 100)
 if not ok then
-    ngx.log(ngx.ERR, "failed to set keepalive: ".. err)
+    --ngx.log(ngx.ERR, "failed to set keepalive: ".. err)
     --ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     --return
 end
