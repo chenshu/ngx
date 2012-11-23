@@ -15,10 +15,12 @@ if tonumber(content_length) > SMALL_FILE_SIZE then
     ngx.exec("/up/upload_big_file")
     return
 else
-    --ngx.exec("/up/upload_small_file")
-    --return
+    ngx.exec("/up/upload_small_file")
+    return
 end
 
+--[[
+-- TODO for test
 local resty_md5 = require "resty.md5"
 local resty_str = require "resty.string"
 local resty_upload = require "resty.upload"
@@ -121,3 +123,4 @@ data = data .. boundary .. "--\r\n"
 res = ngx.location.capture("/up/upload_small_file", {method = ngx.HTTP_POST, body = data, copy_all_vars = true})
 ngx.say(res.status)
 ngx.say(string.len(res.body))
+--]]
