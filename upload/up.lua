@@ -4,6 +4,7 @@ local content_type = ""
 local content_length = 0
 local headers = ngx.req.get_headers()
 for k, v in pairs(headers) do
+    k = string.lower(k)
     if k == "content-length" then
         content_length = v
     elseif k == "content-type" then

@@ -1,15 +1,19 @@
 local SMALL_FILE_SIZE = 1024 * 105
-local SMALL_FILE_HOST = "10.6.2.143"
+local SMALL_FILE_HOST = "10.6.2.144"
 local SMALL_FILE_PORT = 80
+local SMALL_FILE_URL = "/up/up_blk"
 local BIG_FILE_HOST = "10.6.2.50"
 local BIG_FILE_PORT = 80
+local BIG_FILE_URL = "/up/up_blk.php"
 
-local req = "POST /up/up_blk HTTP/1.1\r\n"
+local req = "POST url HTTP/1.1\r\n"
 
 local content_type = ""
 local content_length = 0
 local headers = ngx.req.get_headers()
+local lower = string.lower
 for k, v in pairs(headers) do
+    k = lower(k)
     if k == "content-length" then
         content_length = v
     elseif k == "content-type" then
@@ -22,10 +26,10 @@ req = req .. "\r\n"
 local resty_md5 = require "resty.md5"
 local resty_str = require "resty.string"
 local resty_upload = require "resty.upload"
-local common = require "lua.common"
 local match = string.match
 local gmatch = string.gmatch
 local find = string.find
+local gsub = string.gsub
 
 local boundary = "--" .. match(content_type, "boundary=([-%w]+)")
 
@@ -80,8 +84,10 @@ while true do
                 local ok, err
                 if tonumber(file_length) > SMALL_FILE_SIZE then
                     ok, err = sock:connect(BIG_FILE_HOST, BIG_FILE_PORT)
+                    req = gsub(req, "url", BIG_FILE_URL, 1)
                 else
                     ok, err = sock:connect(SMALL_FILE_HOST, SMALL_FILE_PORT)
+                    req = gsub(req, "url", SMALL_FILE_URL, 1)
                 end
                 if not ok then
                     ngx.log(ngx.ERR, "create tcp socket fail: ", err)
