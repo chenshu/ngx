@@ -19,7 +19,13 @@ for k, v in pairs(headers) do
     elseif k == "content-type" then
         content_type = v
     end
-    req = req .. k .. ": " .. v .. "\r\n"
+    if type(v) == "string" then
+        req = req .. k .. ": " .. v .. "\r\n"
+    elseif type(v) == "table" then
+        for _, item in pairs(v) do
+            req = req .. k .. ": " .. item .. "\r\n"
+        end
+    end
 end
 req = req .. "\r\n"
 
