@@ -49,14 +49,14 @@ local post_args = ngx.encode_args(params)
 
 if tonumber(file_length) > SMALL_FILE_SIZE then
     res = ngx.location.capture("/up_retcon/upload_big_file", {method = ngx.HTTP_POST, body = post_args})
-    if res.status ~= "200" then
+    if res.status ~= ngx.HTTP_OK then
         ngx.status = res.status
     end
     ngx.say(res.body)
     ngx.exit(ngx.HTTP_OK)
 else
     res = ngx.location.capture("/up_retcon/upload_small_file", {method = ngx.HTTP_POST, body = post_args})
-    if res.status ~= "200" then
+    if res.status ~= ngx.HTTP_OK then
         ngx.status = res.status
     end
     ngx.say(res.body)
