@@ -37,7 +37,7 @@ local gmatch = string.gmatch
 local find = string.find
 local gsub = string.gsub
 
-local boundary = "--" .. match(content_type, "boundary=([-%w]+)")
+local boundary = "--" .. get_boundary(content_type)
 
 local md5 = resty_md5:new()
 
@@ -115,6 +115,15 @@ while true do
         end
         break
     end
+end
+
+function get_boundary(content_type)
+    local m = match(content_type, ";%s+boundary=\"([^\"]+)\"")
+    if m then
+        return m
+    end
+
+    return match(content_type, ";%s+boundary=([^\",;]+)")
 end
 
 function parseStatusLineOfResponse(line)
