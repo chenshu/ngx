@@ -34,6 +34,7 @@ local resty_str = require "resty.string"
 local resty_upload = require "resty.upload"
 local match = string.match
 local gmatch = string.gmatch
+local len = string.len
 local find = string.find
 local gsub = string.gsub
 
@@ -93,13 +94,13 @@ while true do
             req = req .. boundary .. "\r\n" .. res[3] .. "\r\n"
         end
     elseif typ == "body" then
-        if is_file then
+        if is_file and len(res) ~= 0 then
             local bytes, err = sock:send(res)
             if not bytes then
                 ngx.log(ngx.ERR, "send body fail: ", err)
                 ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
             end
-        else
+        elseif not is_file then
             if is_fsize then
                 file_length = res
                 local ok, err
