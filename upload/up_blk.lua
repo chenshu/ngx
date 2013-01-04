@@ -2,7 +2,7 @@ local SMALL_FILE_SIZE = 1024 * 105
 local SMALL_FILE_HOST = "10.6.2.144"
 local SMALL_FILE_PORT = 80
 local SMALL_FILE_URL = "/up/up_blk"
-local BIG_FILE_HOST = "10.6.2.50"
+local BIG_FILE_HOST = "127.0.0.1"
 local BIG_FILE_PORT = 80
 local BIG_FILE_URL = "/up/up_blk.php"
 
@@ -37,6 +37,15 @@ local gmatch = string.gmatch
 local find = string.find
 local gsub = string.gsub
 
+function get_boundary(content_type)
+    local m = match(content_type, ";%s+boundary=\"([^\"]+)\"")
+    if m then
+        return m
+    end
+
+    return match(content_type, ";%s+boundary=([^\",;]+)")
+end
+
 local boundary = "--" .. get_boundary(content_type)
 
 local md5 = resty_md5:new()
@@ -48,6 +57,7 @@ form:set_timeout(0)
 local is_file = false
 local is_fsize = false
 local file_length = 0
+local file_name = false
 
 local sock = ngx.socket.tcp()
 sock:settimeout(0)
@@ -64,11 +74,14 @@ while true do
             for k, v in gmatch(res[2], "(%S+)=\"([^\"]+)\"") do
                 if k == "name" and v == "nsp_fsize" then
                     is_fsize = true
+                elseif k == "filename" then
+                    file_name = v
                 end
             end
-            req = req .. boundary .. "\r\n" .. res[3] .. "\r\n"
         else
             is_file = true
+        end
+        if file_name and is_file then
             req = req .. res[3] .. "\r\n\r\n"
             local bytes, err = sock:send(req)
             if not bytes then
@@ -76,6 +89,8 @@ while true do
                 ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
             end
             req = ""
+        else
+            req = req .. boundary .. "\r\n" .. res[3] .. "\r\n"
         end
     elseif typ == "body" then
         if is_file then
@@ -107,6 +122,7 @@ while true do
     elseif typ == "part_end" then
         req = req .. "\r\n"
         is_file = false
+        file_name = false
     elseif typ == "eof" then
         local bytes, err = sock:send(req .. boundary .. "--\r\n")
         if not bytes then
@@ -115,15 +131,6 @@ while true do
         end
         break
     end
-end
-
-function get_boundary(content_type)
-    local m = match(content_type, ";%s+boundary=\"([^\"]+)\"")
-    if m then
-        return m
-    end
-
-    return match(content_type, ";%s+boundary=([^\",;]+)")
 end
 
 function parseStatusLineOfResponse(line)
