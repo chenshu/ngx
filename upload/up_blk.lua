@@ -47,7 +47,13 @@ function get_boundary(content_type)
     return match(content_type, ";%s+boundary=([^\",;]+)")
 end
 
-local boundary = "--" .. get_boundary(content_type)
+local boundary = get_boundary(content_type)
+if not boundary then
+    ngx.log(ngx.ERR, "invalid request: no boundary ", boundary)
+    ngx.exit(ngx.HTTP_BAD_REQUEST)
+end
+
+boundary = "--" .. boundary
 
 local md5 = resty_md5:new()
 
