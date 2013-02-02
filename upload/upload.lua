@@ -92,7 +92,7 @@ local digest = md5:final()
 local hash = resty_str.to_hex(digest)
 local fid = format("%s%s", hash, format("%x", size))
 ngx.say("fid: ", fid)
-local ok, err = rename(local_file_name, "/tmp/" .. fid)
+local ok, err = rename(local_file_name, "/tmp/" .. fid .. "." .. random(4))
 if not ok then
     ngx.log(ngx.ERR, "failed to rename file: ", err)
     ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
