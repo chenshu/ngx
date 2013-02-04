@@ -39,12 +39,12 @@ local find = string.find
 local gsub = string.gsub
 
 function get_boundary(content_type)
-    local m = match(content_type, ";%s+boundary=\"([^\"]+)\"")
+    local m = match(content_type, ";%s*boundary=\"([^\"]+)\"")
     if m then
         return m
     end
 
-    return match(content_type, ";%s+boundary=([^\",;]+)")
+    return match(content_type, ";%s*boundary=([^\",;]+)")
 end
 
 local boundary = get_boundary(content_type)
