@@ -3,25 +3,26 @@ package.path = './container/?.lua;' .. package.path
 local setmetatable = setmetatable
 local require = require
 local error = error
+
+local ngx = ngx
+
+local _M = {
+    _VERSION = '0.0.1'
+}
  
-module(...)
+local mt = { __index = _M }
  
-function sayHello(name)
+function _M.sayHello(name, time)
+    --[[
     local nsp = require "nsp"
     local access_token = "yyyyy"
     local client = nsp:new(access_token)
     local svc = client:service("nsp.bar")
     local ret = svc:sayHello(name)
-    return "foo " .. name .. " " .. ret
+    return "foo sayHello " .. name .. " " .. ret
+    --]]
+    ngx.sleep(time)
+    return "foo sayHello " .. name .. " " .. time
 end
- 
-local mt = { __index = _M }
- 
-local class_mt = {
-    -- to prevent use of casual module global variables
-    __newindex = function (table, key, val)
-        error('attempt to write to undeclared variable "' .. key .. '"')
-    end
-}
- 
-setmetatable(_M, class_mt)
+
+return _M

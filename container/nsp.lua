@@ -10,7 +10,7 @@ module(...)
 local mt = { __index = _M }
 
 local redis_host = "127.0.0.1"
-local redis_port = 6699
+local redis_port = 6379
 local redis_pass = "foobared"
 local redis_timeout = 0
 local redis_brpop_timeout = 10
